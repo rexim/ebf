@@ -1,0 +1,3 @@
+dist/
+.cask/
+*.elc
