@@ -1,4 +1,4 @@
-;;; ebf.el --- brainfuck inside of Emacs Lisp -*- lexical-binding: t -*-
+;;; ebf.el --- brainfuck language transpiler to Emacs Lisp -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014 Alexey Kutepov a.k.a rexim
 
@@ -26,33 +26,9 @@
 ;; CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 ;; SOFTWARE.
 
-;;; Usage:
-;;
-;; The brainfuck inside of Emacs Lisp consists of just one macro
-;; `ebf`. Here is its signature:
-;;
-;; (ebf INPUT-CALLBACK OUTPUT-CALLBACK &rest INSTRUCTIONS)
-;;
-;; INPUT-CALLBACK is called on dot instruction and should have zero
-;; arguments and return a number. OUTPUT-CALLBACK is called on comman
-;; instruction and should have one argument of an integer
-;; type. INSTRUCTIONS is a list of symbols which names are sequences
-;; of brainfuck instructions.
-;;
-;; Here is the Hello World example that macroexpands to the actuall
-;; Emacs Lisp code:
-;;
-;; (let ((result nil))
-;;   (ebf nil #'(lambda (x) (setq result (cons x result)))
-;;        ++++++++++\[>+++++++>++++++++++>+++>+<<<<-\]>++
-;;        .>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.
-;;        ------.--------.>+.>.)
-;;   (apply #'string (reverse result)));<- put cursor here and press C-x C-e
-
-
 ;;; Commentary:
 ;; 
-;; Brainfuck language inside of Emacs Lisp
+;; Brainfuck language tanspiler to Emacs Lisp in a form of a macro
 
 ;;; Code:
 
@@ -93,7 +69,7 @@
     (cons nil nil)))
 
 (defmacro ebf (input-callback output-callback &rest instructions)
-  "Brainfuck language inside of Emacs Lisp.
+  "Brainfuck language transpiler macro.
 INPUT-CALLBACK is called on dot instruction and should have zero
 arguments and return a number. OUTPUT-CALLBACK is called on
 comman instruction and should have one argument of an integer
