@@ -1,0 +1,55 @@
+* ebf
+
+Brainfuck language inside of Emacs Lisp
+
+** Usage
+
+The brainfuck inside of Emacs Lisp consists of just one macro
+~ebf~. Here is its signature:
+
+#+BEGIN_SRC emacs-lisp
+
+(ebf INPUT-CALLBACK OUTPUT-CALLBACK &rest INSTRUCTIONS)
+
+#+END_SRC
+
+~INPUT-CALLBACK~ is called on dot instruction and should have zero
+arguments and return a number. ~OUTPUT-CALLBACK~ is called on comman
+instruction and should have one argument of an integer
+type. ~INSTRUCTIONS~ is a list of symbols which names are sequences of
+brainfuck instructions.
+
+Here is the Hello World example that macroexpands to the actuall
+Emacs Lisp code:
+
+#+BEGIN_SRC emacs-lisp
+(let ((result nil))
+  (ebf nil #'(lambda (x) (setq result (cons x result)))
+       ++++++++++\[>+++++++>++++++++++>+++>+<<<<-\]>++
+       .>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.
+       ------.--------.>+.>.)
+  (apply #'string (reverse result)));<- put cursor here and press C-x C-e
+#+END_SRC
+
+** License
+
+Copyright (C) 2015 Alexey Kutepov a.k.a rexim
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
