@@ -79,9 +79,10 @@ of brainfuck instructions."
         (ebf--pointer-symbol (cl-gensym)))
     `(let ((,ebf--memory-symbol (make-vector 100 0))
            (,ebf--pointer-symbol 0))
-       ,@(car (ebf--compile-instructions
-               (mapcar #'identity
-                       (apply #'concat
-                              (mapcar #'symbol-name instructions))))))))
+       ,@(car (->> instructions
+                   (-map #'symbol-name)
+                   (apply #'concat)
+                   (-map #'identity)
+                   (ebf--compile-instructions))))))
 
 ;;; ebf.el ends here
