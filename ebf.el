@@ -42,7 +42,7 @@
 (defvar ebf--memory-symbol nil)
 (defvar ebf--pointer-symbol nil)
 
-(defun ebf--compile-instruction (instruction)
+(defun ebf--compile-one-instruction (instruction)
   (cl-case instruction
     (?> `(cl-incf ,ebf--pointer-symbol))
     (?< `(cl-decf ,ebf--pointer-symbol))
@@ -62,7 +62,7 @@
                              compiled2) rest2))))
         (?\] (cons nil (cdr instructions)))
         (otherwise (-let (((compiled . rest) (ebf--compile-instructions (cdr instructions))))
-                     (cons (cons (ebf--compile-instruction (car instructions))
+                     (cons (cons (ebf--compile-one-instruction (car instructions))
                                  compiled) rest))))
     (cons nil nil)))
 
