@@ -75,8 +75,8 @@ type. INSTRUCTIONS is a list of symbols which names are sequences
 of brainfuck instructions."
   (let ((ebf--input-callback input-callback)
         (ebf--output-callback output-callback)
-        (ebf--memory-symbol (cl-gensym))
-        (ebf--pointer-symbol (cl-gensym)))
+        (ebf--memory-symbol (cl-gensym "MEMORY"))
+        (ebf--pointer-symbol (cl-gensym "POINTER")))
     `(let ((,ebf--memory-symbol (make-vector 100 0))
            (,ebf--pointer-symbol 0))
        ,@(car (->> instructions
