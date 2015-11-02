@@ -29,16 +29,16 @@ So the code
 will be expanded to
 
 #+BEGIN_SRC emacs-lisp
-(let ((memory (make-vector 100 0))
-      (pointer 0))
-  (cl-incf (aref memory pointer))
-  (cl-incf (aref memory pointer))
-  (cl-incf (aref memory pointer))
-  (while (not (zerop (aref memory pointer)))
-    (cl-decf (aref memory pointer))
-    (cl-incf pointer)
-    (cl-incf (aref memory pointer))
-    (cl-decf pointer)))
+(let ((G31336 (make-vector 100 0))
+      (G31337 0))
+  (cl-incf (aref G31336 G31337))
+  (cl-incf (aref G31336 G31337))
+  (cl-incf (aref G31336 G31337))
+  (while (not (zerop (aref G31336 G31337)))
+    (cl-decf (aref G31336 G31337))
+    (cl-incf G31337)
+    (cl-incf (aref G31336 G31337))
+    (cl-decf G31337)))
 #+END_SRC
 
 As you can see we don't do any optimizations and have a memory

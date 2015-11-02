@@ -37,36 +37,32 @@
 (require 'cl-lib)
 (require 'dash)
 
-(defun ebf--compile-instruction (instruction input-callback output-callback)
-  (cl-case instruction
-    (?> '(cl-incf pointer))
-    (?< '(cl-decf pointer))
-    (?+ '(cl-incf (aref memory pointer)))
-    (?- '(cl-decf (aref memory pointer)))
-    (?. `(funcall ,output-callback (aref memory pointer)))
-    (?, `(aset memory pointer (funcall ,input-callback)))))
+(defvar ebf--input-callback nil)
+(defvar ebf--output-callback nil)
+(defvar ebf--memory-symbol nil)
+(defvar ebf--pointer-symbol nil)
 
-(defun ebf--compile-instructions (instructions input-callback output-callback)
+(defun ebf--compile-one-instruction (instruction)
+  (cl-case instruction
+    (?> `(cl-incf ,ebf--pointer-symbol))
+    (?< `(cl-decf ,ebf--pointer-symbol))
+    (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
+    (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
+    (?. `(funcall ,ebf--output-callback (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
+    (?, `(aset ,ebf--memory-symbol ,ebf--pointer-symbol (funcall ,ebf--input-callback)))))
+
+(defun ebf--compile-instructions (instructions)
   (if instructions
       (cl-case (car instructions)
-        (?\[ (-let (((compiled . rest)
-                     (ebf--compile-instructions (cdr instructions)
-                                                input-callback
-                                                output-callback)))
-               (-let (((compiled2 . rest2)
-                       (ebf--compile-instructions rest input-callback output-callback)))
-                 (cons (cons `(while (not (zerop (aref memory pointer)))
+        (?\[ (-let (((compiled . rest) (ebf--compile-instructions (cdr instructions))))
+               (-let (((compiled2 . rest2) (ebf--compile-instructions rest)))
+                 (cons (cons `(while (not (zerop (aref ,ebf--memory-symbol
+                                                       ,ebf--pointer-symbol)))
                                 ,@compiled)
                              compiled2) rest2))))
         (?\] (cons nil (cdr instructions)))
-        (otherwise (-let (((compiled . rest)
-                           (ebf--compile-instructions
-                            (cdr instructions)
-                            input-callback
-                            output-callback)))
-                     (cons (cons (ebf--compile-instruction (car instructions)
-                                                           input-callback
-                                                           output-callback)
+        (otherwise (-let (((compiled . rest) (ebf--compile-instructions (cdr instructions))))
+                     (cons (cons (ebf--compile-one-instruction (car instructions))
                                  compiled) rest))))
     (cons nil nil)))
 
@@ -77,13 +73,16 @@ arguments and return a number. OUTPUT-CALLBACK is called on
 comman instruction and should have one argument of an integer
 type. INSTRUCTIONS is a list of symbols which names are sequences
 of brainfuck instructions."
-  `(let ((memory (make-vector 100 0))
-         (pointer 0))
-     ,@(car (ebf--compile-instructions
-             (mapcar #'identity
-                     (apply #'concat
-                            (mapcar #'symbol-name instructions)))
-             input-callback
-             output-callback))))
+  (let ((ebf--input-callback input-callback)
+        (ebf--output-callback output-callback)
+        (ebf--memory-symbol (cl-gensym))
+        (ebf--pointer-symbol (cl-gensym)))
+    `(let ((,ebf--memory-symbol (make-vector 100 0))
+           (,ebf--pointer-symbol 0))
+       ,@(car (->> instructions
+                   (-map #'symbol-name)
+                   (apply #'concat)
+                   (-map #'identity)
+                   (ebf--compile-instructions))))))
 
 ;;; ebf.el ends here
