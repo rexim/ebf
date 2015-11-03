@@ -51,20 +51,21 @@
     (?. `(funcall ,ebf--output-callback (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
     (?, `(aset ,ebf--memory-symbol ,ebf--pointer-symbol (funcall ,ebf--input-callback)))))
 
+(defun ebf--compile-chunk-of-instructions (chunk-of-instructions)
+  (cond ((symbolp chunk-of-instructions)
+         (->> chunk-of-instructions
+              (symbol-name)
+              (-map #'ebf--compile-one-instruction)))
+        ((vectorp chunk-of-instructions)
+         (list `(while (not (zerop (aref ,ebf--memory-symbol
+                                         ,ebf--pointer-symbol)))
+                  ,@(ebf--compile-instructions
+                     chunk-of-instructions))))))
+
 (defun ebf--compile-instructions (instructions)
-  (if instructions
-      (cl-case (car instructions)
-        (?\[ (-let (((compiled . rest) (ebf--compile-instructions (cdr instructions))))
-               (-let (((compiled2 . rest2) (ebf--compile-instructions rest)))
-                 (cons (cons `(while (not (zerop (aref ,ebf--memory-symbol
-                                                       ,ebf--pointer-symbol)))
-                                ,@compiled)
-                             compiled2) rest2))))
-        (?\] (cons nil (cdr instructions)))
-        (otherwise (-let (((compiled . rest) (ebf--compile-instructions (cdr instructions))))
-                     (cons (cons (ebf--compile-one-instruction (car instructions))
-                                 compiled) rest))))
-    (cons nil nil)))
+  (->> instructions
+       (-map #'ebf--compile-chunk-of-instructions)
+       (apply #'append)))
 
 (defmacro ebf (input-callback output-callback &rest instructions)
   "Brainfuck language transpiler macro.
@@ -79,10 +80,6 @@ of brainfuck instructions."
         (ebf--pointer-symbol (cl-gensym "POINTER")))
     `(let ((,ebf--memory-symbol (make-vector 100 0))
            (,ebf--pointer-symbol 0))
-       ,@(car (->> instructions
-                   (-map #'symbol-name)
-                   (apply #'concat)
-                   (-map #'identity)
-                   (ebf--compile-instructions))))))
+       ,@(ebf--compile-instructions instructions))))
 
 ;;; ebf.el ends here

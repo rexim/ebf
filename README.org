@@ -23,7 +23,7 @@ brainfuck instructions.
 So the code
 
 #+BEGIN_SRC emacs-lisp
-(ebf nil nil +++\[->+<\])
+(ebf nil nil +++[->+<])
 #+END_SRC
 
 will be expanded to
@@ -49,7 +49,7 @@ Here is the classical Hello World example with some output:
 #+BEGIN_SRC emacs-lisp
 (let ((result nil))
   (ebf nil #'(lambda (x) (setq result (cons x result)))
-       ++++++++++\[>+++++++>++++++++++>+++>+<<<<-\]>++
+       ++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++
        .>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.
        ------.--------.>+.>.)
   (apply #'string (reverse result)));<- put cursor here and press C-x C-e
