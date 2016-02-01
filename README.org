@@ -15,30 +15,42 @@ signature of this macro:
 #+END_SRC
 
 ~INPUT-CALLBACK~ is called on dot instruction and should have zero
-arguments and return a number. ~OUTPUT-CALLBACK~ is called on comman
-instruction and should have one argument of an integer
-type. ~INSTRUCTIONS~ is a list of symbols which names are sequences of
-brainfuck instructions.
+arguments and return a number.
+
+~OUTPUT-CALLBACK~ is called on comman instruction and should have one
+argument of an integer type.
+
+~INSTRUCTIONS~ is a list of symbols and vectors of symbols. Vectors
+are accepted so you don't need to escape square brackets of your
+brainfuck program. Symbols' names should be sequences of valid
+brainfuck instructions except square brackets.
+
+Evaluation of the macro expansion causes the brainfuck program
+execution.
 
 So the code
 
 #+BEGIN_SRC emacs-lisp
-(ebf nil nil +++[->+<])
+(ebf input output \,+++[->+<].)
 #+END_SRC
 
 will be expanded to
 
 #+BEGIN_SRC emacs-lisp
-(let ((MEMORY75904 (make-vector 100 0))
-      (POINTER75905 0))
-  (cl-incf (aref MEMORY75904 POINTER75905))
-  (cl-incf (aref MEMORY75904 POINTER75905))
-  (cl-incf (aref MEMORY75904 POINTER75905))
-  (while (not (zerop (aref MEMORY75904 POINTER75905)))
-    (cl-decf (aref MEMORY75904 POINTER75905))
-    (cl-incf POINTER75905)
-    (cl-incf (aref MEMORY75904 POINTER75905))
-    (cl-decf POINTER75905)))
+(let ((MEMORY32194 (make-vector 100 0))
+      (POINTER32195 0)
+      (INPUT32192 input)
+      (OUTPUT32193 output))
+  (aset MEMORY32194 POINTER32195 (funcall INPUT32192))
+  (cl-incf (aref MEMORY32194 POINTER32195))
+  (cl-incf (aref MEMORY32194 POINTER32195))
+  (cl-incf (aref MEMORY32194 POINTER32195))
+  (while (not (zerop (aref MEMORY32194 POINTER32195)))
+    (cl-decf (aref MEMORY32194 POINTER32195))
+    (cl-incf POINTER32195)
+    (cl-incf (aref MEMORY32194 POINTER32195))
+    (cl-decf POINTER32195))
+  (funcall OUTPUT32193 (aref MEMORY32194 POINTER32195)))
 #+END_SRC
 
 As you can see we don't do any optimizations and have a memory

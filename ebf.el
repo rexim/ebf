@@ -82,10 +82,18 @@ the ebf macro. The end of the input is indicated by -1."
 (defmacro ebf (input-callback output-callback &rest instructions)
   "Brainfuck language transpiler macro.
 INPUT-CALLBACK is called on dot instruction and should have zero
-arguments and return a number. OUTPUT-CALLBACK is called on
-comman instruction and should have one argument of an integer
-type. INSTRUCTIONS is a list of symbols which names are sequences
-of brainfuck instructions."
+arguments and return a number.
+
+OUTPUT-CALLBACK is called on comman instruction and should have
+one argument of an integer type.
+
+INSTRUCTIONS is a list of symbols and vectors of symbols. Vectors
+are accepted so you don't need to escape square brackets of your
+brainfuck program. Symbols' names should be sequences of valid
+brainfuck instructions except square brackets.
+
+Evaluation of the macro expansion causes the brainfuck program
+execution."
   (let ((ebf--input-callback-symbol (cl-gensym "INPUT"))
         (ebf--output-callback-symbol (cl-gensym "OUTPUT"))
         (ebf--memory-symbol (cl-gensym "MEMORY"))
