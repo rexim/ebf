@@ -48,7 +48,7 @@ Here is the classical Hello World example with some output:
 
 #+BEGIN_SRC emacs-lisp
 (let ((result nil))
-  (ebf nil #'(lambda (x) (setq result (cons x result)))
+  (ebf nil #'(lambda (x) (push x result))
        ++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++
        .>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.
        ------.--------.>+.>.)
