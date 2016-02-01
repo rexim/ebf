@@ -67,6 +67,14 @@
        (-map #'ebf--compile-chunk-of-instructions)
        (apply #'append)))
 
+(defun ebf-string-input (s)
+  "Constructs an ebf input callback for feeding stirng as an input.
+The result of this function can by passed as INPUT-CALLBACK to
+the ebf macro. The end of the input is indicated by -1."
+  (let ((chars (mapcar #'identity s)))
+    (lambda ()
+      (if (not chars) -1 (pop chars)))))
+
 (defmacro ebf (input-callback output-callback &rest instructions)
   "Brainfuck language transpiler macro.
 INPUT-CALLBACK is called on dot instruction and should have zero
