@@ -14,10 +14,10 @@ signature of this macro:
 
 #+END_SRC
 
-~INPUT-CALLBACK~ is called on dot instruction and should have zero
+~INPUT-CALLBACK~ is called on comma instruction and should have zero
 arguments and return a number.
 
-~OUTPUT-CALLBACK~ is called on comman instruction and should have one
+~OUTPUT-CALLBACK~ is called on dot instruction and should have one
 argument of an integer type.
 
 ~INSTRUCTIONS~ is a list of symbols and vectors of symbols. Vectors
