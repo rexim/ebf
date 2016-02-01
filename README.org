@@ -37,24 +37,22 @@ So the code
 will be expanded to
 
 #+BEGIN_SRC emacs-lisp
-(let ((MEMORY32194 (make-vector 100 0))
-      (POINTER32195 0)
-      (INPUT32192 input)
-      (OUTPUT32193 output))
-  (aset MEMORY32194 POINTER32195 (funcall INPUT32192))
-  (cl-incf (aref MEMORY32194 POINTER32195))
-  (cl-incf (aref MEMORY32194 POINTER32195))
-  (cl-incf (aref MEMORY32194 POINTER32195))
-  (while (not (zerop (aref MEMORY32194 POINTER32195)))
-    (cl-decf (aref MEMORY32194 POINTER32195))
-    (cl-incf POINTER32195)
-    (cl-incf (aref MEMORY32194 POINTER32195))
-    (cl-decf POINTER32195))
-  (funcall OUTPUT32193 (aref MEMORY32194 POINTER32195)))
+(let ((MEMORY75843 (make-vector 100 0))
+      (POINTER75844 0)
+      (INPUT75841 input)
+      (OUTPUT75842 output))
+  (aset MEMORY75843 POINTER75844 (funcall INPUT75841))
+  (cl-incf (aref MEMORY75843 POINTER75844) 3)
+  (while (not (zerop (aref MEMORY75843 POINTER75844)))
+    (cl-decf (aref MEMORY75843 POINTER75844) 1)
+    (cl-incf POINTER75844 1)
+    (cl-incf (aref MEMORY75843 POINTER75844) 1)
+    (cl-decf POINTER75844 1))
+  (funcall OUTPUT75842 (aref MEMORY75843 POINTER75844)))
 #+END_SRC
 
-As you can see we don't do any optimizations and have a memory
-limitation. But we are working on that.
+As you can see we have memory limited to 100 cells. But we are working
+on that.
 
 Here is the classical Hello World example with some output:
 
