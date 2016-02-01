@@ -21,7 +21,7 @@ arguments and return a number.
 argument of an integer type.
 
 ~INSTRUCTIONS~ is a list of symbols and vectors of symbols. Vectors
-are accepted so you don't need to escape square brackets of your
+are accepted so we don't need to escape square brackets of our
 brainfuck program. Symbols' names should be sequences of valid
 brainfuck instructions except square brackets.
 
@@ -51,8 +51,8 @@ will be expanded to
   (funcall OUTPUT75842 (aref MEMORY75843 POINTER75844)))
 #+END_SRC
 
-As you can see we have memory limited to 100 cells. But we are working
-on that.
+Currently we have memory limited to 100 cells. But we are working on
+that.
 
 Here is the classical Hello World example with some output:
 
@@ -68,13 +68,13 @@ Here is the classical Hello World example with some output:
 ** Compiling ebf
 
 ~ebf~ macro produces the code that doesn't depend on ~ebf~ module
-itself. That means you can byte-compile your brainfuck programs so
-they will not require ~ebf~ at runtime.
+itself. That means we can byte-compile our brainfuck programs so they
+will not require ~ebf~ at runtime.
 
 Check [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Compiling-Macros.html][Macros and Byte Compilation]] section of the official Emacs Lisp
 manual on how to do that.
 
-Basically we will need to wrap you ~(require 'ebf)~ with
+Basically we will need to wrap our ~(require 'ebf)~ with
 ~eval-when-compile~ like
 
 #+BEGIN_SRC emacs-lisp
