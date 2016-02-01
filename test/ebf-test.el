@@ -7,3 +7,37 @@
                           .>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.
                           ------.--------.>+.>.)
                      (apply #'string (reverse result))))))
+
+(defun rot-13 (text)
+  (let ((result nil))
+    (ebf (ebf-string-input text)
+         (lambda (x) (push x result))
+         -\,+
+         [-
+          [>>++++
+           [>++++++++<-]
+           <+<-
+           [>+>+>-
+            [>>>]
+            <
+            [[>+<-]>>+>]
+            <<<<<-]]
+          >>>[-]+
+          >--
+          [-[<->+++[-]]]<
+          [++++++++++++<
+           [>-
+            [>+>>]
+            >[+[<+>-]>+>>]
+            <<<<<-]
+           >>[<+>-]
+           >[-[-<<[-]>>]<<[<<->>-]>>]
+           <<[<<+>>-]]
+          <[-]
+          <.[-]
+          <-\,+])
+    (apply #'string (reverse result))))
+
+(ert-deftest ebf-rot-13-test ()
+  (should (string= (rot-13 "hello") "uryyb"))
+  (should (string= (rot-13 "uryyb") "hello")))
