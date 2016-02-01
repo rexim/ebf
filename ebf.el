@@ -1,6 +1,6 @@
 ;;; ebf.el --- brainfuck language transpiler to Emacs Lisp -*- lexical-binding: t -*-
 
-;; Copyright (C) 2014 Alexey Kutepov a.k.a rexim
+;; Copyright (C) 2016 Alexey Kutepov a.k.a rexim
 
 ;; Author: Alexey Kutepov <reximkut@gmail.com>
 ;; Maintainer: Alexey Kutepov <reximkut@gmail.com>
@@ -106,14 +106,6 @@
        (-partition-by #'symbolp)
        (-map #'ebf--merge-chunks)
        (apply #'append)))
-
-(defun ebf-string-input (s)
-  "Constructs an ebf input callback for feeding stirng as an input.
-The result of this function can by passed as INPUT-CALLBACK to
-the ebf macro. The end of the input is indicated by -1."
-  (let ((chars (mapcar #'identity s)))
-    (lambda ()
-      (if (not chars) -1 (pop chars)))))
 
 (defmacro ebf (input-callback output-callback &rest instructions)
   "Brainfuck language transpiler macro.
