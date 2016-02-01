@@ -43,23 +43,34 @@
 (defvar ebf--memory-symbol nil)
 (defvar ebf--pointer-symbol nil)
 
-(defun ebf--compile-one-instruction (instruction)
-  (cl-case instruction
-    (?> `(cl-incf ,ebf--pointer-symbol))
-    (?< `(cl-decf ,ebf--pointer-symbol))
-    (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
-    (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
-    (?. `(funcall ,ebf--output-callback-symbol
-                  (aref ,ebf--memory-symbol
-                        ,ebf--pointer-symbol)))
-    (?, `(aset ,ebf--memory-symbol
-               ,ebf--pointer-symbol
-               (funcall ,ebf--input-callback-symbol)))))
+(defun ebf--compile-rle-group (rle-group)
+  (let ((instruction (car rle-group))
+        (size (cdr rle-group)))
+    (cl-case instruction
+      (?> `(cl-incf ,ebf--pointer-symbol ,size))
+      (?< `(cl-decf ,ebf--pointer-symbol ,size))
+      (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
+      (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
+      (?. `(dotimes (,(cl-gensym "I") ,size)
+             (funcall ,ebf--output-callback-symbol
+                      (aref ,ebf--memory-symbol
+                            ,ebf--pointer-symbol))))
+      (?, `(dotimes (,(cl-gensym "I") ,size)
+             (aset ,ebf--memory-symbol
+                   ,ebf--pointer-symbol
+                   (funcall ,ebf--input-callback-symbol)))))))
+
+(defun ebf--rle-group-chunk-of-instructions (chunk-of-instructions)
+  (->> chunk-of-instructions
+       (mapcar #'identity)
+       (-partition-by #'identity)
+       (-map (-lambda (xs) (cons (car xs) (length xs))))))
 
 (defun ebf--compile-chunk-of-instructions (chunk-of-instructions)
   (cond ((stringp chunk-of-instructions)
-         (-map #'ebf--compile-one-instruction
-               chunk-of-instructions))
+         (->> chunk-of-instructions
+              (ebf--rle-group-chunk-of-instructions)
+              (-map #'ebf--compile-rle-group)))
         ((listp chunk-of-instructions)
          (list `(while (not (zerop (aref ,ebf--memory-symbol
                                          ,ebf--pointer-symbol)))
