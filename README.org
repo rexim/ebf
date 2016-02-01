@@ -65,6 +65,23 @@ Here is the classical Hello World example with some output:
   (apply #'string (reverse result)));<- put cursor here and press C-x C-e
 #+END_SRC
 
+** Compiling ebf
+
+`ebf` macro produces the code that doesn't depend on `ebf` module
+itself. That means you can byte-compile your brainfuck programs so
+they will not require `ebf` at runtime.
+
+Check [[http://www.gnu.org/software/emacs/manual/html_node/elisp/Compiling-Macros.html][Macros and Byte Compilation]] section of the official Emacs Lisp
+manual on how to do that.
+
+Basically we will need to wrap you `(require 'ebf)` with
+`eval-when-compile` like
+
+```
+(eval-when-compile
+ (require 'ebf))
+```
+
 ** License
 
 Copyright (C) 2015 Alexey Kutepov a.k.a rexim
