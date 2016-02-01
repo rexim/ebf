@@ -37,8 +37,8 @@
 (require 'cl-lib)
 (require 'dash)
 
-(defvar ebf--input-callback nil)
-(defvar ebf--output-callback nil)
+(defvar ebf--input-callback-symbol nil)
+(defvar ebf--output-callback-symbol nil)
 (defvar ebf--memory-symbol nil)
 (defvar ebf--pointer-symbol nil)
 
@@ -48,8 +48,12 @@
     (?< `(cl-decf ,ebf--pointer-symbol))
     (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
     (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
-    (?. `(funcall ,ebf--output-callback (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
-    (?, `(aset ,ebf--memory-symbol ,ebf--pointer-symbol (funcall ,ebf--input-callback)))))
+    (?. `(funcall ,ebf--output-callback-symbol
+                  (aref ,ebf--memory-symbol
+                        ,ebf--pointer-symbol)))
+    (?, `(aset ,ebf--memory-symbol
+               ,ebf--pointer-symbol
+               (funcall ,ebf--input-callback-symbol)))))
 
 (defun ebf--compile-chunk-of-instructions (chunk-of-instructions)
   (cond ((symbolp chunk-of-instructions)
@@ -82,12 +86,14 @@ arguments and return a number. OUTPUT-CALLBACK is called on
 comman instruction and should have one argument of an integer
 type. INSTRUCTIONS is a list of symbols which names are sequences
 of brainfuck instructions."
-  (let ((ebf--input-callback input-callback)
-        (ebf--output-callback output-callback)
+  (let ((ebf--input-callback-symbol (cl-gensym "INPUT"))
+        (ebf--output-callback-symbol (cl-gensym "OUTPUT"))
         (ebf--memory-symbol (cl-gensym "MEMORY"))
         (ebf--pointer-symbol (cl-gensym "POINTER")))
     `(let ((,ebf--memory-symbol (make-vector 100 0))
-           (,ebf--pointer-symbol 0))
+           (,ebf--pointer-symbol 0)
+           (,ebf--input-callback-symbol ,input-callback)
+           (,ebf--output-callback-symbol ,output-callback))
        ,@(ebf--compile-instructions instructions))))
 
 ;;; ebf.el ends here
