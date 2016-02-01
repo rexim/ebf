@@ -104,4 +104,6 @@ execution."
            (,ebf--output-callback-symbol ,output-callback))
        ,@(ebf--compile-instructions instructions))))
 
+(provide 'ebf)
+
 ;;; ebf.el ends here
