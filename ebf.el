@@ -118,7 +118,7 @@ argument of an integer type.
 INSTRUCTIONS is a list of symbols and vectors of symbols. Vectors
 are accepted so we don't need to escape square brackets of our
 brainfuck program. Symbols' names should be sequences of valid
-brainfuck instructions except square brackets.
+brainfuck instructions excluding square brackets.
 
 Evaluation of the macro expansion causes the brainfuck program
 execution."
