@@ -36,6 +36,7 @@
 
 (require 'cl-lib)
 (require 'dash)
+(require 'dash-functional)
 
 (defvar ebf--input-callback-symbol nil)
 (defvar ebf--output-callback-symbol nil)
@@ -56,11 +57,10 @@
                (funcall ,ebf--input-callback-symbol)))))
 
 (defun ebf--compile-chunk-of-instructions (chunk-of-instructions)
-  (cond ((symbolp chunk-of-instructions)
-         (->> chunk-of-instructions
-              (symbol-name)
-              (-map #'ebf--compile-one-instruction)))
-        ((vectorp chunk-of-instructions)
+  (cond ((stringp chunk-of-instructions)
+         (-map #'ebf--compile-one-instruction
+               chunk-of-instructions))
+        ((listp chunk-of-instructions)
          (list `(while (not (zerop (aref ,ebf--memory-symbol
                                          ,ebf--pointer-symbol)))
                   ,@(ebf--compile-instructions
@@ -69,6 +69,23 @@
 (defun ebf--compile-instructions (instructions)
   (->> instructions
        (-map #'ebf--compile-chunk-of-instructions)
+       (apply #'append)))
+
+(defun ebf--merge-chunks (chunks)
+  (if (-all-p #'symbolp chunks)
+      (->> chunks
+           (-map #'symbol-name)
+           (apply #'concat)
+           (list))
+    (-map (-compose
+           #'ebf--normalize-instructions
+           (-partial #'mapcar #'identity))
+          chunks)))
+
+(defun ebf--normalize-instructions (instructions)
+  (->> instructions
+       (-partition-by #'symbolp)
+       (-map #'ebf--merge-chunks)
        (apply #'append)))
 
 (defun ebf-string-input (s)
@@ -102,7 +119,9 @@ execution."
            (,ebf--pointer-symbol 0)
            (,ebf--input-callback-symbol ,input-callback)
            (,ebf--output-callback-symbol ,output-callback))
-       ,@(ebf--compile-instructions instructions))))
+       ,@(->> instructions
+              (ebf--normalize-instructions)
+              (ebf--compile-instructions)))))
 
 (provide 'ebf)
 
