@@ -36,31 +36,50 @@
 
 (require 'cl-lib)
 (require 'dash)
+(require 'dash-functional)
 
 (defvar ebf--input-callback-symbol nil)
 (defvar ebf--output-callback-symbol nil)
 (defvar ebf--memory-symbol nil)
 (defvar ebf--pointer-symbol nil)
 
-(defun ebf--compile-one-instruction (instruction)
-  (cl-case instruction
-    (?> `(cl-incf ,ebf--pointer-symbol))
-    (?< `(cl-decf ,ebf--pointer-symbol))
-    (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
-    (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol)))
-    (?. `(funcall ,ebf--output-callback-symbol
-                  (aref ,ebf--memory-symbol
-                        ,ebf--pointer-symbol)))
-    (?, `(aset ,ebf--memory-symbol
-               ,ebf--pointer-symbol
-               (funcall ,ebf--input-callback-symbol)))))
+(defun ebf--compile-rle-group (rle-group)
+  (let ((instruction (car rle-group))
+        (size (cdr rle-group)))
+    (cl-case instruction
+      (?> `(cl-incf ,ebf--pointer-symbol ,size))
+      (?< `(cl-decf ,ebf--pointer-symbol ,size))
+      (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
+      (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
+      (?. (if (= 1 size)
+              `(funcall ,ebf--output-callback-symbol
+                        (aref ,ebf--memory-symbol
+                              ,ebf--pointer-symbol))
+            `(dotimes (,(cl-gensym "I") ,size)
+               (funcall ,ebf--output-callback-symbol
+                        (aref ,ebf--memory-symbol
+                              ,ebf--pointer-symbol)))))
+      (?, (if (= 1 size)
+              `(aset ,ebf--memory-symbol
+                     ,ebf--pointer-symbol
+                     (funcall ,ebf--input-callback-symbol))
+            `(dotimes (,(cl-gensym "I") ,size)
+               (aset ,ebf--memory-symbol
+                     ,ebf--pointer-symbol
+                     (funcall ,ebf--input-callback-symbol))))))))
+
+(defun ebf--rle-group-chunk-of-instructions (chunk-of-instructions)
+  (->> chunk-of-instructions
+       (mapcar #'identity)
+       (-partition-by #'identity)
+       (-map (-lambda (xs) (cons (car xs) (length xs))))))
 
 (defun ebf--compile-chunk-of-instructions (chunk-of-instructions)
-  (cond ((symbolp chunk-of-instructions)
+  (cond ((stringp chunk-of-instructions)
          (->> chunk-of-instructions
-              (symbol-name)
-              (-map #'ebf--compile-one-instruction)))
-        ((vectorp chunk-of-instructions)
+              (ebf--rle-group-chunk-of-instructions)
+              (-map #'ebf--compile-rle-group)))
+        ((listp chunk-of-instructions)
          (list `(while (not (zerop (aref ,ebf--memory-symbol
                                          ,ebf--pointer-symbol)))
                   ,@(ebf--compile-instructions
@@ -69,6 +88,23 @@
 (defun ebf--compile-instructions (instructions)
   (->> instructions
        (-map #'ebf--compile-chunk-of-instructions)
+       (apply #'append)))
+
+(defun ebf--merge-chunks (chunks)
+  (if (-all-p #'symbolp chunks)
+      (->> chunks
+           (-map #'symbol-name)
+           (apply #'concat)
+           (list))
+    (-map (-compose
+           #'ebf--normalize-instructions
+           (-partial #'mapcar #'identity))
+          chunks)))
+
+(defun ebf--normalize-instructions (instructions)
+  (->> instructions
+       (-partition-by #'symbolp)
+       (-map #'ebf--merge-chunks)
        (apply #'append)))
 
 (defun ebf-string-input (s)
@@ -102,7 +138,9 @@ execution."
            (,ebf--pointer-symbol 0)
            (,ebf--input-callback-symbol ,input-callback)
            (,ebf--output-callback-symbol ,output-callback))
-       ,@(ebf--compile-instructions instructions))))
+       ,@(->> instructions
+              (ebf--normalize-instructions)
+              (ebf--compile-instructions)))))
 
 (provide 'ebf)
 
