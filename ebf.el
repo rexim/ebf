@@ -51,14 +51,22 @@
       (?< `(cl-decf ,ebf--pointer-symbol ,size))
       (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
       (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
-      (?. `(dotimes (,(cl-gensym "I") ,size)
-             (funcall ,ebf--output-callback-symbol
-                      (aref ,ebf--memory-symbol
-                            ,ebf--pointer-symbol))))
-      (?, `(dotimes (,(cl-gensym "I") ,size)
-             (aset ,ebf--memory-symbol
-                   ,ebf--pointer-symbol
-                   (funcall ,ebf--input-callback-symbol)))))))
+      (?. (if (= 1 size)
+              `(funcall ,ebf--output-callback-symbol
+                        (aref ,ebf--memory-symbol
+                              ,ebf--pointer-symbol))
+            `(dotimes (,(cl-gensym "I") ,size)
+               (funcall ,ebf--output-callback-symbol
+                        (aref ,ebf--memory-symbol
+                              ,ebf--pointer-symbol)))))
+      (?, (if (= 1 size)
+              `(aset ,ebf--memory-symbol
+                     ,ebf--pointer-symbol
+                     (funcall ,ebf--input-callback-symbol))
+            `(dotimes (,(cl-gensym "I") ,size)
+               (aset ,ebf--memory-symbol
+                     ,ebf--pointer-symbol
+                     (funcall ,ebf--input-callback-symbol))))))))
 
 (defun ebf--rle-group-chunk-of-instructions (chunk-of-instructions)
   (->> chunk-of-instructions
