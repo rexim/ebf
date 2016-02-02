@@ -43,6 +43,12 @@
 (defvar ebf--memory-symbol nil)
 (defvar ebf--pointer-symbol nil)
 
+(defun ebf--repeat-action (action times)
+  (if (= 1 times)
+      action
+    `(dotimes (,(cl-gensym "I") ,times)
+       ,action)))
+
 (defun ebf--compile-rle-group (rle-group)
   (let ((instruction (car rle-group))
         (size (cdr rle-group)))
@@ -51,22 +57,14 @@
       (?< `(cl-decf ,ebf--pointer-symbol ,size))
       (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
       (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
-      (?. (if (= 1 size)
-              `(funcall ,ebf--output-callback-symbol
-                        (aref ,ebf--memory-symbol
-                              ,ebf--pointer-symbol))
-            `(dotimes (,(cl-gensym "I") ,size)
-               (funcall ,ebf--output-callback-symbol
-                        (aref ,ebf--memory-symbol
-                              ,ebf--pointer-symbol)))))
-      (?, (if (= 1 size)
-              `(aset ,ebf--memory-symbol
-                     ,ebf--pointer-symbol
-                     (funcall ,ebf--input-callback-symbol))
-            `(dotimes (,(cl-gensym "I") ,size)
-               (aset ,ebf--memory-symbol
-                     ,ebf--pointer-symbol
-                     (funcall ,ebf--input-callback-symbol))))))))
+      (?. (ebf--repeat-action `(funcall ,ebf--output-callback-symbol
+                                        (aref ,ebf--memory-symbol
+                                              ,ebf--pointer-symbol))
+                              size))
+      (?, (ebf--repeat-action `(aset ,ebf--memory-symbol
+                                     ,ebf--pointer-symbol
+                                     (funcall ,ebf--input-callback-symbol))
+                              size)))))
 
 (defun ebf--rle-group-chunk-of-instructions (chunk-of-instructions)
   (->> chunk-of-instructions
