@@ -105,6 +105,27 @@
        (-map #'ebf--merge-chunks)
        (apply #'append)))
 
+(defun ebf--verify-one-instruction (instruction)
+  (when (not (-find (-partial #'= instruction)
+                    (list ?- ?+ ?> ?< ?. ?,)))
+    (error "`%c' is not a valid ebf brainfuck instruction"
+           instruction)))
+
+(defun ebf--verify-instructions (instructions)
+  (dolist (chunk-of-instructions instructions)
+    (cond ((symbolp chunk-of-instructions)
+           (-each (mapcar #'identity (symbol-name chunk-of-instructions))
+             #'ebf--verify-one-instruction))
+
+          ((vectorp chunk-of-instructions)
+           (->> chunk-of-instructions
+                (mapcar #'identity)
+                (ebf--verify-instructions)))
+
+          (t (error (concat "%s is neither symbol nor vector of symbols. "
+                            "Please check the ebf macro documentation.")
+                    chunk-of-instructions)))))
+
 (defmacro ebf (input-callback output-callback &rest instructions)
   "Brainfuck language transpiler macro.
 INPUT-CALLBACK is called on comma instruction and should have
@@ -120,6 +141,7 @@ brainfuck instructions excluding square brackets.
 
 Evaluation of the macro expansion causes the brainfuck program
 execution."
+  (ebf--verify-instructions instructions)
   (let ((ebf--input-callback-symbol (cl-gensym "INPUT"))
         (ebf--output-callback-symbol (cl-gensym "OUTPUT"))
         (ebf--memory-symbol (cl-gensym "MEMORY"))
