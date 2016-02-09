@@ -37,7 +37,7 @@ So the code
 will be expanded to
 
 #+BEGIN_SRC emacs-lisp
-(let ((MEMORY68087 (make-vector 1 0))
+(let ((MEMORY68087 (make-vector 100 0))
       (POINTER68088 0)
       (INPUT68085 input)
       (OUTPUT68086 output))
