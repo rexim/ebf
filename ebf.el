@@ -38,6 +38,9 @@
 (require 'dash)
 (require 'dash-functional)
 
+(defconst ebf-initial-memory-size 100
+  "Initial size of the ebf memory buffer")
+
 (defvar ebf--input-callback-symbol nil)
 (defvar ebf--output-callback-symbol nil)
 (defvar ebf--memory-symbol nil)
@@ -53,7 +56,15 @@
   (let ((instruction (car rle-group))
         (size (cdr rle-group)))
     (cl-case instruction
-      (?> `(cl-incf ,ebf--pointer-symbol ,size))
+      (?> `(progn
+             (cl-incf ,ebf--pointer-symbol ,size)
+             (while (<= (length ,ebf--memory-symbol) ,ebf--pointer-symbol)
+               (let ((memory-length (length ,ebf--memory-symbol)))
+                 (setq ,ebf--memory-symbol
+                       (vconcat
+                        ,ebf--memory-symbol
+                        (make-vector (max 1 (/ memory-length 2))
+                                     0)))))))
       (?< `(cl-decf ,ebf--pointer-symbol ,size))
       (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
       (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
@@ -146,7 +157,7 @@ execution."
         (ebf--output-callback-symbol (cl-gensym "OUTPUT"))
         (ebf--memory-symbol (cl-gensym "MEMORY"))
         (ebf--pointer-symbol (cl-gensym "POINTER")))
-    `(let ((,ebf--memory-symbol (make-vector 100 0))
+    `(let ((,ebf--memory-symbol (make-vector ,ebf-initial-memory-size 0))
            (,ebf--pointer-symbol 0)
            (,ebf--input-callback-symbol ,input-callback)
            (,ebf--output-callback-symbol ,output-callback))
