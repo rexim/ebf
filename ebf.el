@@ -38,6 +38,9 @@
 (require 'dash)
 (require 'dash-functional)
 
+(defconst ebf-initial-memory-size 100
+  "Initial size of the ebf memory buffer")
+
 (defvar ebf--input-callback-symbol nil)
 (defvar ebf--output-callback-symbol nil)
 (defvar ebf--memory-symbol nil)
@@ -154,7 +157,7 @@ execution."
         (ebf--output-callback-symbol (cl-gensym "OUTPUT"))
         (ebf--memory-symbol (cl-gensym "MEMORY"))
         (ebf--pointer-symbol (cl-gensym "POINTER")))
-    `(let ((,ebf--memory-symbol (make-vector 100 0))
+    `(let ((,ebf--memory-symbol (make-vector ,ebf-initial-memory-size 0))
            (,ebf--pointer-symbol 0)
            (,ebf--input-callback-symbol ,input-callback)
            (,ebf--output-callback-symbol ,output-callback))
