@@ -41,3 +41,21 @@
 (ert-deftest ebf-rot-13-test ()
   (should (string= (rot-13 "hello") "uryyb"))
   (should (string= (rot-13 "uryyb") "hello")))
+
+(setq ebf-initial-memory-size 1)
+(ert-deftest ebf-memory-expansion ()
+  (let ((input-numbers (number-sequence 1 10))
+        (output-numbers '()))
+    (ebf nil (lambda (x) (push x output-numbers))
+         +.>
+         ++.>
+         +++.>
+         ++++.>
+         +++++.>
+         ++++++.>
+         +++++++.>
+         ++++++++.>
+         +++++++++.>
+         ++++++++++.>)
+    (should (equal (reverse output-numbers)
+                   input-numbers))))
