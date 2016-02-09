@@ -1,12 +1,10 @@
-;;; ebf.el --- brainfuck language transpiler to Emacs Lisp -*- lexical-binding: t -*-
+;;; ebf-helpers.el --- brainfuck language transpiler to Emacs Lisp -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015-2016 Alexey Kutepov a.k.a rexim
 
 ;; Author: Alexey Kutepov <reximkut@gmail.com>
 ;; Maintainer: Alexey Kutepov <reximkut@gmail.com>
 ;; URL: http://github.com/rexim/ebf
-;; Version: 0.0.1
-;; Package-Requires: ((dash "2.11.0") (dash-functional "1.2.0") (cl-lib "0.5"))
 
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -44,4 +42,4 @@ the ebf macro. The end of the input is indicated by -1."
 
 (provide 'ebf-helpers)
 
-;;; ebf.el ends here
+;;; ebf-helpers.el ends here
