@@ -37,26 +37,36 @@ So the code
 will be expanded to
 
 #+BEGIN_SRC emacs-lisp
-(let ((MEMORY75843 (make-vector 100 0))
-      (POINTER75844 0)
-      (INPUT75841 input)
-      (OUTPUT75842 output))
-  (aset MEMORY75843 POINTER75844 (funcall INPUT75841))
-  (cl-incf (aref MEMORY75843 POINTER75844) 3)
-  (while (not (zerop (aref MEMORY75843 POINTER75844)))
-    (cl-decf (aref MEMORY75843 POINTER75844) 1)
-    (cl-incf POINTER75844 1)
-    (cl-incf (aref MEMORY75843 POINTER75844) 1)
-    (cl-decf POINTER75844 1))
-  (funcall OUTPUT75842 (aref MEMORY75843 POINTER75844)))
+(let ((MEMORY68087 (make-vector 1 0))
+      (POINTER68088 0)
+      (INPUT68085 input)
+      (OUTPUT68086 output))
+  (aset MEMORY68087 POINTER68088 (funcall INPUT68085))
+  (cl-incf (aref MEMORY68087 POINTER68088) 3)
+  (while (not (zerop (aref MEMORY68087 POINTER68088)))
+    (cl-decf (aref MEMORY68087 POINTER68088) 1)
+    (progn (cl-incf POINTER68088 1)
+           (while (<= (length MEMORY68087) POINTER68088)
+             (let ((memory-length (length MEMORY68087)))
+               (setq MEMORY68087
+                     (vconcat MEMORY68087
+                              (make-vector
+                               (max 1 (/ memory-length 2))
+                               0))))))
+    (cl-incf (aref MEMORY68087 POINTER68088) 1)
+    (cl-decf POINTER68088 1))
+  (funcall OUTPUT68086 (aref MEMORY68087 POINTER68088)))
 #+END_SRC
 
-Currently we have memory limited to 100 cells. But we are working on
-that.
+We collapse several instructions in a row and automatically expand the
+memory to the right. But we plan to add more optimization in the
+future.
 
 Here is the classical Hello World example with some output:
 
 #+BEGIN_SRC emacs-lisp
+(require 'ebf)
+
 (let ((result nil))
   (ebf nil #'(lambda (x) (push x result))
        ++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++
