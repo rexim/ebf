@@ -59,8 +59,7 @@ will be expanded to
 #+END_SRC
 
 We collapse several instructions in a row and automatically expand the
-memory to the right. But we plan to add more optimization in the
-future.
+memory to the right. We plan to add more optimization in the future.
 
 Here is the classical Hello World example with some output:
 
