@@ -5,7 +5,7 @@
 ;; Author: Alexey Kutepov <reximkut@gmail.com>
 ;; Maintainer: Alexey Kutepov <reximkut@gmail.com>
 ;; URL: http://github.com/rexim/ebf
-;; Version: 0.0.1
+;; Version: 1.0.0
 ;; Package-Requires: ((dash "2.11.0") (dash-functional "1.2.0") (cl-lib "0.5"))
 
 ;; Permission is hereby granted, free of charge, to any person
