@@ -48,26 +48,25 @@
 
 (defun ebf--repeat-action (action times)
   (if (= 1 times)
-      action
-    `(dotimes (,(cl-gensym "I") ,times)
-       ,action)))
+      `(,action)
+    `((dotimes (,(cl-gensym "I") ,times)
+         ,action))))
 
 (defun ebf--compile-rle-group (rle-group)
   (let ((instruction (car rle-group))
         (size (cdr rle-group)))
     (cl-case instruction
-      (?> `(progn
-             (cl-incf ,ebf--pointer-symbol ,size)
-             (while (<= (length ,ebf--memory-symbol) ,ebf--pointer-symbol)
-               (let ((memory-length (length ,ebf--memory-symbol)))
-                 (setq ,ebf--memory-symbol
-                       (vconcat
-                        ,ebf--memory-symbol
-                        (make-vector (max 1 (/ memory-length 2))
-                                     0)))))))
-      (?< `(cl-decf ,ebf--pointer-symbol ,size))
-      (?+ `(cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
-      (?- `(cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size))
+      (?> `((cl-incf ,ebf--pointer-symbol ,size)
+            (while (<= (length ,ebf--memory-symbol) ,ebf--pointer-symbol)
+              (let ((memory-length (length ,ebf--memory-symbol)))
+                (setq ,ebf--memory-symbol
+                      (vconcat
+                       ,ebf--memory-symbol
+                       (make-vector (max 1 (/ memory-length 2))
+                                    0)))))))
+      (?< `((cl-decf ,ebf--pointer-symbol ,size)))
+      (?+ `((cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size)))
+      (?- `((cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size)))
       (?. (ebf--repeat-action `(funcall ,ebf--output-callback-symbol
                                         (aref ,ebf--memory-symbol
                                               ,ebf--pointer-symbol))
@@ -87,7 +86,7 @@
   (cond ((stringp chunk-of-instructions)
          (->> chunk-of-instructions
               (ebf--rle-group-chunk-of-instructions)
-              (-map #'ebf--compile-rle-group)))
+              (-mapcat #'ebf--compile-rle-group)))
         ((listp chunk-of-instructions)
          (list `(while (not (zerop (aref ,ebf--memory-symbol
                                          ,ebf--pointer-symbol)))
