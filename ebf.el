@@ -88,10 +88,15 @@
               (ebf--rle-group-chunk-of-instructions)
               (-mapcat #'ebf--compile-rle-group)))
         ((listp chunk-of-instructions)
-         (list `(while (not (zerop (aref ,ebf--memory-symbol
-                                         ,ebf--pointer-symbol)))
-                  ,@(ebf--compile-instructions
-                     chunk-of-instructions))))))
+         (if (or (equal chunk-of-instructions '("+"))
+                 (equal chunk-of-instructions '("-")))
+             (list `(aset ,ebf--memory-symbol
+                          ,ebf--pointer-symbol
+                          0))
+           (list `(while (not (zerop (aref ,ebf--memory-symbol
+                                           ,ebf--pointer-symbol)))
+                    ,@(ebf--compile-instructions
+                       chunk-of-instructions)))))))
 
 (defun ebf--compile-instructions (instructions)
   (->> instructions
