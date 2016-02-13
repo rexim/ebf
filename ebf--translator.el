@@ -47,7 +47,7 @@
     `((dotimes (,(cl-gensym "I") ,times)
         ,action))))
 
-(defun ebf--compile-rle-group (rle-group)
+(defun ebf--translate-rle-group (rle-group)
   (let ((instruction (car rle-group))
         (size (cdr rle-group)))
     (cl-case instruction
@@ -71,11 +71,11 @@
                                      (funcall ,ebf--input-callback-symbol))
                               size)))))
 
-(defun ebf--compile-chunk-of-instructions (chunk-of-instructions)
+(defun ebf--translate-chunk-of-instructions (chunk-of-instructions)
   (cond ((stringp chunk-of-instructions)
          (->> chunk-of-instructions
               (ebf--rle-group-chunk-of-instructions)
-              (-mapcat #'ebf--compile-rle-group)))
+              (-mapcat #'ebf--translate-rle-group)))
         ((listp chunk-of-instructions)
          (if (or (equal chunk-of-instructions '("+"))
                  (equal chunk-of-instructions '("-")))
@@ -84,12 +84,12 @@
                           0))
            (list `(while (not (zerop (aref ,ebf--memory-symbol
                                            ,ebf--pointer-symbol)))
-                    ,@(ebf--compile-instructions
+                    ,@(ebf--translate-instructions
                        chunk-of-instructions)))))))
 
-(defun ebf--compile-instructions (instructions)
+(defun ebf--translate-instructions (instructions)
   (->> instructions
-       (-map #'ebf--compile-chunk-of-instructions)
+       (-map #'ebf--translate-chunk-of-instructions)
        (apply #'append)))
 
 (provide 'ebf--translator)

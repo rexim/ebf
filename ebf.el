@@ -88,7 +88,7 @@ execution."
            (,ebf--output-callback-symbol ,output-callback))
        ,@(->> instructions
               (ebf--normalize-instructions)
-              (ebf--compile-instructions)))))
+              (ebf--translate-instructions)))))
 
 (provide 'ebf)
 
