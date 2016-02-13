@@ -39,71 +39,7 @@
 (require 'dash-functional)
 
 (require 'ebf--optimizer)
-
-(defconst ebf-initial-memory-size 100
-  "Initial size of the ebf memory buffer")
-
-(defvar ebf--input-callback-symbol nil)
-(defvar ebf--output-callback-symbol nil)
-(defvar ebf--memory-symbol nil)
-(defvar ebf--pointer-symbol nil)
-
-(defun ebf--repeat-action (action times)
-  (if (= 1 times)
-      `(,action)
-    `((dotimes (,(cl-gensym "I") ,times)
-         ,action))))
-
-(defun ebf--compile-rle-group (rle-group)
-  (let ((instruction (car rle-group))
-        (size (cdr rle-group)))
-    (cl-case instruction
-      (?> `((cl-incf ,ebf--pointer-symbol ,size)
-            (while (<= (length ,ebf--memory-symbol) ,ebf--pointer-symbol)
-              (let ((memory-length (length ,ebf--memory-symbol)))
-                (setq ,ebf--memory-symbol
-                      (vconcat
-                       ,ebf--memory-symbol
-                       (make-vector (max 1 (/ memory-length 2))
-                                    0)))))))
-      (?< `((cl-decf ,ebf--pointer-symbol ,size)))
-      (?+ `((cl-incf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size)))
-      (?- `((cl-decf (aref ,ebf--memory-symbol ,ebf--pointer-symbol) ,size)))
-      (?. (ebf--repeat-action `(funcall ,ebf--output-callback-symbol
-                                        (aref ,ebf--memory-symbol
-                                              ,ebf--pointer-symbol))
-                              size))
-      (?, (ebf--repeat-action `(aset ,ebf--memory-symbol
-                                     ,ebf--pointer-symbol
-                                     (funcall ,ebf--input-callback-symbol))
-                              size)))))
-
-(defun ebf--rle-group-chunk-of-instructions (chunk-of-instructions)
-  (->> chunk-of-instructions
-       (mapcar #'identity)
-       (-partition-by #'identity)
-       (-map (-lambda (xs) (cons (car xs) (length xs))))))
-
-(defun ebf--compile-chunk-of-instructions (chunk-of-instructions)
-  (cond ((stringp chunk-of-instructions)
-         (->> chunk-of-instructions
-              (ebf--rle-group-chunk-of-instructions)
-              (-mapcat #'ebf--compile-rle-group)))
-        ((listp chunk-of-instructions)
-         (if (or (equal chunk-of-instructions '("+"))
-                 (equal chunk-of-instructions '("-")))
-             (list `(aset ,ebf--memory-symbol
-                          ,ebf--pointer-symbol
-                          0))
-           (list `(while (not (zerop (aref ,ebf--memory-symbol
-                                           ,ebf--pointer-symbol)))
-                    ,@(ebf--compile-instructions
-                       chunk-of-instructions)))))))
-
-(defun ebf--compile-instructions (instructions)
-  (->> instructions
-       (-map #'ebf--compile-chunk-of-instructions)
-       (apply #'append)))
+(require 'ebf--translator)
 
 (defun ebf--verify-one-instruction (instruction)
   (when (not (-find (-partial #'= instruction)
