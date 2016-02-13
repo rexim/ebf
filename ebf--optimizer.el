@@ -48,6 +48,12 @@
        (-map #'ebf--merge-chunks)
        (apply #'append)))
 
+(defun ebf--rle-group-chunk-of-instructions (chunk-of-instructions)
+  (->> chunk-of-instructions
+       (mapcar #'identity)
+       (-partition-by #'identity)
+       (-map (-lambda (xs) (cons (car xs) (length xs))))))
+
 (provide 'ebf--optimizer)
 
 ;;; ebf--optimizer.el ends here

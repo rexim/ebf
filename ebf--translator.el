@@ -31,6 +31,8 @@
 
 ;;; Code:
 
+(require 'ebf--optimizer)
+
 (defconst ebf-initial-memory-size 100
   "Initial size of the ebf memory buffer")
 
@@ -68,13 +70,6 @@
                                      ,ebf--pointer-symbol
                                      (funcall ,ebf--input-callback-symbol))
                               size)))))
-
-(defun ebf--rle-group-chunk-of-instructions (chunk-of-instructions)
-  (->> chunk-of-instructions
-       (mapcar #'identity)
-       (-partition-by #'identity)
-       (-map (-lambda (xs) (cons (car xs) (length xs))))))
-
 
 (defun ebf--compile-chunk-of-instructions (chunk-of-instructions)
   (cond ((stringp chunk-of-instructions)
