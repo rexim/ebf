@@ -54,6 +54,18 @@
        (-partition-by #'identity)
        (-map (-lambda (xs) (cons (car xs) (length xs))))))
 
+(defun ebf--f (ast-group)
+  (if (and ast-group
+           (listp ast-group)
+           (listp (car ast-group)))
+      (ebf--remove-consecutive-loops (car ast-group))
+    (car ast-group)))
+
+(defun ebf--remove-consecutive-loops (ast)
+  (->> ast
+       (-partition-by #'symbolp)
+       (-map #'ebf--f)))
+
 (provide 'ebf--optimizer)
 
 ;;; ebf--optimizer.el ends here
