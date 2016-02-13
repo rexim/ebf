@@ -38,6 +38,8 @@
 (require 'dash)
 (require 'dash-functional)
 
+(require 'ebf--optimizer)
+
 (defconst ebf-initial-memory-size 100
   "Initial size of the ebf memory buffer")
 
@@ -101,23 +103,6 @@
 (defun ebf--compile-instructions (instructions)
   (->> instructions
        (-map #'ebf--compile-chunk-of-instructions)
-       (apply #'append)))
-
-(defun ebf--merge-chunks (chunks)
-  (if (-all-p #'symbolp chunks)
-      (->> chunks
-           (-map #'symbol-name)
-           (apply #'concat)
-           (list))
-    (-map (-compose
-           #'ebf--normalize-instructions
-           (-partial #'mapcar #'identity))
-          chunks)))
-
-(defun ebf--normalize-instructions (instructions)
-  (->> instructions
-       (-partition-by #'symbolp)
-       (-map #'ebf--merge-chunks)
        (apply #'append)))
 
 (defun ebf--verify-one-instruction (instruction)
