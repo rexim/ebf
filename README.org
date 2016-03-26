@@ -31,31 +31,31 @@ execution.
 So the code
 
 #+BEGIN_SRC emacs-lisp
-(ebf input output \,+++[->+<].)
+  (ebf input output \,+++[->+<].)
 #+END_SRC
 
 will be expanded to
 
 #+BEGIN_SRC emacs-lisp
-(let ((MEMORY68087 (make-vector 100 0))
-      (POINTER68088 0)
-      (INPUT68085 input)
-      (OUTPUT68086 output))
-  (aset MEMORY68087 POINTER68088 (funcall INPUT68085))
-  (cl-incf (aref MEMORY68087 POINTER68088) 3)
-  (while (not (zerop (aref MEMORY68087 POINTER68088)))
-    (cl-decf (aref MEMORY68087 POINTER68088) 1)
-    (progn (cl-incf POINTER68088 1)
-           (while (<= (length MEMORY68087) POINTER68088)
-             (let ((memory-length (length MEMORY68087)))
-               (setq MEMORY68087
-                     (vconcat MEMORY68087
-                              (make-vector
-                               (max 1 (/ memory-length 2))
-                               0))))))
-    (cl-incf (aref MEMORY68087 POINTER68088) 1)
-    (cl-decf POINTER68088 1))
-  (funcall OUTPUT68086 (aref MEMORY68087 POINTER68088)))
+  (let ((MEMORY68087 (make-vector 100 0))
+        (POINTER68088 0)
+        (INPUT68085 input)
+        (OUTPUT68086 output))
+    (aset MEMORY68087 POINTER68088 (funcall INPUT68085))
+    (cl-incf (aref MEMORY68087 POINTER68088) 3)
+    (while (not (zerop (aref MEMORY68087 POINTER68088)))
+      (cl-decf (aref MEMORY68087 POINTER68088) 1)
+      (cl-incf POINTER68088 1)
+      (while (<= (length MEMORY68087) POINTER68088)
+        (let ((memory-length (length MEMORY68087)))
+          (setq MEMORY68087
+                (vconcat MEMORY68087
+                         (make-vector
+                          (max 1 (/ memory-length 2))
+                          0)))))
+      (cl-incf (aref MEMORY68087 POINTER68088) 1)
+      (cl-decf POINTER68088 1))
+    (funcall OUTPUT68086 (aref MEMORY68087 POINTER68088)))
 #+END_SRC
 
 We collapse several instructions in a row and automatically expand the
