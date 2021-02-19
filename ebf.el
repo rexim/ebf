@@ -6,7 +6,7 @@
 ;; Maintainer: Alexey Kutepov <reximkut@gmail.com>
 ;; URL: http://github.com/rexim/ebf
 ;; Version: 1.0.0
-;; Package-Requires: ((dash "2.11.0") (dash-functional "1.2.0") (cl-lib "0.5"))
+;; Package-Requires: ((dash "2.18.0") (cl-lib "0.5"))
 
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -36,7 +36,6 @@
 
 (require 'cl-lib)
 (require 'dash)
-(require 'dash-functional)
 
 (defconst ebf-initial-memory-size 100
   "Initial size of the ebf memory buffer")
